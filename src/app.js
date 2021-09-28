@@ -4,10 +4,13 @@ console.log('app started');
 import tmi from 'tmi.js'
 import { CHANNEL_NAME, OAUTH_TOKEN, BOT_USERNAME } from './constants';
 import { rolldie} from './variables';
-import fetch from "node-fetch";
 
-var win = 0;
-var loss = 0;
+//import fetch  from "node-fetch";
+
+var wincounter = 0;
+var losscounter = 0;
+var w = 1;
+var l = 1;
 
 
 const client = new tmi.Client({
@@ -32,7 +35,7 @@ client.on('connected', onConnectedHandler);
 
 // Connect to Twitch:
 client.connect();
-
+console.log('debugg line 35');
 
 /*basic commands */
 function onMessageHandler (target, context, msg, self) {
@@ -42,14 +45,14 @@ function onMessageHandler (target, context, msg, self) {
 	const commandName = msg.trim();
 	if (commandName === '!d20') {
 	  const num = rolldie();
-	  client.say(target.channel, `You rolled a ${num}`);
+	  client.say(target, `You rolled a ${num}`);
 	  console.log(`* Executed ${commandName} command`);
 	} else {
 	  console.log(`* Unknown command ${commandName}`);
 	};
+console.log('debug line 50');
 
-
-	if (commandName === '!elo') {
+	/*if (commandName === '!elo') {
 		var ranks;
 var id;
 
@@ -71,14 +74,29 @@ for (const name of names){
             
         });
     });
-};
+}*/
 
+//win loss counter crap!
 if (commandName === '!win') {
-    console.print(++w);
+	var wins = wincounter
+	client.say(target, 'Added 1 win! Poggers!');
+    console.log(wincounter = parseInt(wincounter) + 1);
 };
 if (commandName === '!loss') {
-    console.print(++l);
-}
+    console.log(losscounter = parseInt(losscounter) + 1);
+	client.say(target, 'Added 1 loss! Fuck!')
+};
+if (commandName === '!reset') {
+    console.log('reset');
+	client.say(target, 'Reset win loss counter')
+	wincounter = 0;
+	losscounter = 0;
+	console.log(wincounter,losscounter)
+};
+if (commandName === '!wl') {
+	console.log(wincounter, '-' ,losscounter)
+	client.say(target, wincounter + '-' + losscounter)
+};
 
   
 
@@ -95,8 +113,23 @@ if (commandName === '!loss') {
 /*bot ban call lines*/
 
 /*music*/
+var SpotifyWebApi = require('spotify-web-api-node');
 
-
-
-
-	}}
+// credentials are optional
+var spotifyApi = new SpotifyWebApi({
+  clientId: '6fcba4d088e6481d81e4d2e6ab03d0cd',
+  clientSecret: '4509e25b62804060876cfd97dc9eaf02',
+  redirectUri: 'https://getyourspotifyrefreshtoken.herokuapp.com/callback'
+});
+spotifyApi.setAccessToken('BQCe5EKqidkoNGlUhUtRJ3zMMQOMnPEiEnhcrB_U9KE2HrsEaYw4h1JoGe9MC_zHLkpJ5yaVcvTQ61AyuMNKbWiEWRyKz-itvtHTIpu_-qQc2ejrXG_cbK2OOCh5kESzLl5nurBDLFqv4nkN9XknK9kduy5ooNFc6R43dcU5Il55LLtXPnzxmoWXlqVnRJjEd8Uxqqbfgt3wB7ZY_yYSkKEZKjWKFoTW3iWM5wdJR7vTWNm0mVgdep1lUTWAHF3h5j_E9wEihPF0pRJPYx28CNUzVg');
+//current song still need to figure out how to print out artist too
+if (commandName === '!song') {
+spotifyApi.getMyCurrentPlayingTrack()
+  .then(function(data) {
+    console.log('Now playing: ' + data.body.item.name);
+	client.say(target, 'Now playing: ' + data.body.item.name);
+  }, function(err) {
+    console.log('Something went wrong!', err);
+  });
+}
+}
