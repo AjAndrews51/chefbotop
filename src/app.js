@@ -5,6 +5,14 @@ const tmi = require('tmi.js');
 import { CHANNEL_NAME, OAUTH_TOKEN, BOT_USERNAME } from './constants';
 import { rolldie} from './variables';
 import fetch  from "node-fetch";
+var mysql = require('mysql');
+var con = mysql.createConnection({
+  host: "localhost",
+  user: "root",
+  password: "",
+  database: "chefbot"
+});
+ 
 //const fetch = require('node-fetch');
 //const fetch = (...args) => import('node-fetch').then(({default: fetch}) => fetch(...args));
 
@@ -40,15 +48,16 @@ client.connect();
 //channel = userdata
 
 /*basic commands */
+
+
 function onMessageHandler (target, channel, message, self,) { //added userstate cause message.trim(); to not work
     const badges = channel.badges || {};
     const isBroadcaster = badges.broadcaster;
     const isMod = badges.moderator;
     const isModUp = isBroadcaster || isMod;
 
-
 	if (self) { return; } // Ignore messages from the bot
-	const commandName = message.trim();
+  const commandName = message.trim();
 	// Remove whitespace from chat message 	JSON.stringify(userstate);
 	if (commandName === '!d20') {
 	  const num = rolldie();
@@ -57,7 +66,20 @@ function onMessageHandler (target, channel, message, self,) { //added userstate 
 	} else {
 	  console.log(`* Unknown command ${commandName}`);
 	};
-			
+  
+  /*if (commandName === '!joinq') {
+    con.connect(function(err){
+      console.log("connected!");
+      var sql = ('INSERT INTO queue (username) VALUES ('+channel.username+')');
+      //DatabaseConnection.query('INSERT INTO queue (username) VALUES ('+channel.username+')');
+    con.query(sql, function (err, result){
+       if (err) throw err;
+       console.log("1 record inserted");
+      })
+  
+    })
+};*/
+//Doesnt add username only adds +channel.username+ too DB
 
 	if (commandName === '!elo') {
 		var ranks;
@@ -115,7 +137,8 @@ if (commandName === '!wl') {
 function fuck(){
 	console.log('you fucked up bitch')
 };
-}
+
+
 
 /* point system and point system commands */
 
@@ -182,3 +205,4 @@ spotifyApi.getMyCurrentPlayingTrack()
   });
 }
 }*/
+}
