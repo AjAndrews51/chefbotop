@@ -67,18 +67,20 @@ function onMessageHandler (target, channel, message, self,) { //added userstate 
 	  console.log(`* Unknown command ${commandName}`);
 	};
   
-  /*if (commandName === '!joinq') {
+  if (commandName === '!joinq') {
     con.connect(function(err){
       console.log("connected!");
-      var sql = ('INSERT INTO queue (username) VALUES ('+channel.username+')');
+      //var sql = ('INSERT INTO queue (username) VALUES ('+channel.username+')');
+      con.query(`INSERT INTO queue (username) VALUES ('${channel.username}');`, function (err, result, fields) {
+        if (err) throw err;
+        });
       //DatabaseConnection.query('INSERT INTO queue (username) VALUES ('+channel.username+')');
-    con.query(sql, function (err, result){
-       if (err) throw err;
+      client.say(target, `@${channel.username} addedto queue your position in queue X`);
        console.log("1 record inserted");
       })
   
-    })
-};*/
+    
+};
 //Doesnt add username only adds +channel.username+ too DB
 
 	if (commandName === '!elo') {
@@ -130,7 +132,19 @@ if (commandName === '!wl') {
 	console.log(wincounter, '-' ,losscounter)
 	client.say(target,'W: ' + wincounter + '-' + 'L: ' + losscounter)
 	fs.writeFile('winloss.txt', wincounter + "-" + losscounter, fuck)
-}}
+}};
+if (commandName === '!clearq') {
+  client.say(target, "Queue Cleared!");
+  con.connect(function(err) {
+    var sql = "TRUNCATE queue ";
+   con.query(sql, function (err, result) {
+      if (err) throw err;
+      console.log("Queue Cleared");
+      
+    });
+  
+
+} )}
 ;
 
 
