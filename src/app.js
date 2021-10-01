@@ -1,21 +1,48 @@
 console.log('app started');
 
+/*const { Client, Intents } = require('discord.js');
+const { token } = require('./config.json');
+
+// Create a new client instance
+const client = new Client({ intents: [Intents.FLAGS.GUILDS] });
+
+// When the client is ready, run this code (only once)
+client.once('ready', () => {
+	console.log('Ready!');
+});
+
+// Login to Discord with your client's token
+client.login(token);*/
+
+
 const fs =require('fs')
 const tmi = require('tmi.js');
 import { CHANNEL_NAME, OAUTH_TOKEN, BOT_USERNAME } from './constants';
 import { rolldie} from './variables';
 import fetch  from "node-fetch";
-var mysql = require('mysql');
-var con = mysql.createConnection({
-  host: "localhost",
-  user: "root",
-  password: "",
-  database: "chefbot"
+var MySql = require('sync-mysql');
+
+var connection = new MySql({
+  host: 'localhost',
+  user: 'root',
+  password: ''
+});
+ 
+//const result = connection.query('SELECT 1 + 1 AS solution');
+
+const knex = require('knex')({
+  client: 'mysql',
+  connection: {
+    host : '127.0.0.1',
+    port : 3306,
+    user : 'root',
+    password : '',
+    database : 'chefbot'
+  }
 });
  
 //const fetch = require('node-fetch');
 //const fetch = (...args) => import('node-fetch').then(({default: fetch}) => fetch(...args));
-
 
 var wincounter = 0;
 var losscounter = 0;
@@ -23,7 +50,7 @@ var w = 1;
 var l = 1;
 
 
-const client = new tmi.Client({
+const client_ttv = new tmi.Client({
 	options: { debug: true, messagesLogLevel: "info" },
 	connection: {
 		reconnect: true,
@@ -40,47 +67,67 @@ function onConnectedHandler (addr, port) {
 	console.log(`* Connected to ${addr}:${port}`);
   };
 
-client.on('message', onMessageHandler);
-client.on('connected', onConnectedHandler);
+client_ttv.on('message', onMessageHandler);
+client_ttv.on('connected', onConnectedHandler);
 // Connect to Twitch:
-client.connect();
+client_ttv.connect();
 
 //channel = userdata
 
 /*basic commands */
-
-
 function onMessageHandler (target, channel, message, self,) { //added userstate cause message.trim(); to not work
     const badges = channel.badges || {};
     const isBroadcaster = badges.broadcaster;
     const isMod = badges.moderator;
     const isModUp = isBroadcaster || isMod;
+//test to see if message spliting works
+
 
 	if (self) { return; } // Ignore messages from the bot
-  const commandName = message.trim();
+  var commandName = message.trim();
+  const args = commandName.split(" ");
+  commandName = args[0];
+  console.log(args)
+  //const PREFIX = "!";
+  //let [commandName, ...args] = message.slice(PREFIX.length).split(/ +/g);
 	// Remove whitespace from chat message 	JSON.stringify(userstate);
-	if (commandName === '!d20') {
+	
+  if (commandName === '!d20') {
 	  const num = rolldie();
-	  client.say(target, `@${channel.username} rolled a ${num}`);
+	  client_ttv.say(target, `@${channel.username} rolled a ${num}`);
 	  console.log(`* Executed ${commandName} command`);
 	} else {
 	  console.log(`* Unknown command ${commandName}`);
 	};
-  
+
+var twtchname = (channel.username)
+
+if (commandName === '!test'){
+ console.log('test command not set up')
+    }
+
   if (commandName === '!joinq') {
-    con.connect(function(err){
-      console.log("connected!");
-      //var sql = ('INSERT INTO queue (username) VALUES ('+channel.username+')');
-      con.query(`INSERT INTO queue (username) VALUES ('${channel.username}');`, function (err, result, fields) {
-        if (err) throw err;
-        });
-      //DatabaseConnection.query('INSERT INTO queue (username) VALUES ('+channel.username+')');
-      client.say(target, `@${channel.username} addedto queue your position in queue X`);
-       console.log("1 record inserted");
-      })
-  
-    
-};
+    knex('queue')
+  .insert({
+    username: (channel.username),
+  })
+  .onConflict(channel.username)
+  .ignore()
+  .catch(function(error) {
+    console.log(error)
+  });
+  knex.select('fuck')
+  .from('queue')
+  .where({ username: (twtchname) })
+  .then(function(rows){
+    const fck =  JSON.stringify(rows);
+    const fcks = JSON.parse(fck);
+    console.log(fck[9]);
+    client_ttv.say(target, '@'+(twtchname)+ ' in queue at position '+(fck[9]))
+  })
+     // client_ttv.say(target, `@${channel.username} addedto queue your position in queue is ` (fck)[9] );
+       console.log("1 record inserted") 
+      };
 //Doesnt add username only adds +channel.username+ too DB
 
 	if (commandName === '!elo') {
@@ -97,10 +144,10 @@ for (const name of names){
                 var tier = ranks[0].tier;
                 var rank = ranks[0].rank;
                 var LP = ranks[0].leaguePoints;
-                client.say(target, name + ' is ' + tier + ' - ' + rank + ' ' + LP +' LP');
+                client_ttv.say(target, name + ' is ' + tier + ' - ' + rank + ' ' + LP +' LP');
             }
             else{
-                client.say(target, name + ' is unranked');
+                client_ttv.say(target, name + ' is unranked');
             }
             
         });
@@ -111,45 +158,63 @@ for (const name of names){
     // Something mod only
 if(isModUp) {
 
+ if(commandName === '!dq') {  
+      knex('queue')
+  .where({fuck : '1, 2 , 3, 4'})
+  .del()
+  .then()
+  console.log('1 row deleted')
+};
+
+
+if (commandName === '!resettest'){
+  knex.schema.raw('ALTER TABLE `queue` AUTO_INCREMENT = 1')
+  .then()
+
+};
 if (commandName === '!win') {
 	var wins = wincounter
-	client.say(target, 'Added 1 win! Poggers!');
+	client_ttv.say(target, 'Added 1 win! Poggers!');
     console.log(wincounter = parseInt(wincounter) + 1);
+    fs.writeFile('winloss.txt', wincounter + "-" + losscounter, fuck)
 };
 if (commandName === '!loss') {
     console.log(losscounter = parseInt(losscounter) + 1);
-	client.say(target, 'Added 1 loss! Fuck!')
-};
+	client_ttv.say(target, 'Added 1 loss! Fuck!')
+  fs.writeFile('winloss.txt', wincounter + "-" + losscounter, fuck)
+}
 if (commandName === '!reset') {
     console.log('reset');
-	client.say(target, 'Reset win loss counter')
+	client_ttv.say(target, 'Reset win loss counter')
 	wincounter = 0;
 	losscounter = 0;
 	console.log(wincounter,losscounter)
 	fs.writeFile('winloss.txt', '0-0', fuck)
-};
+}
 if (commandName === '!wl') {
 	console.log(wincounter, '-' ,losscounter)
-	client.say(target,'W: ' + wincounter + '-' + 'L: ' + losscounter)
+	client_ttv.say(target,'W: ' + wincounter + '-' + 'L: ' + losscounter)
 	fs.writeFile('winloss.txt', wincounter + "-" + losscounter, fuck)
-}};
+}
 if (commandName === '!clearq') {
-  client.say(target, "Queue Cleared!");
-  con.connect(function(err) {
-    var sql = "TRUNCATE queue ";
-   con.query(sql, function (err, result) {
-      if (err) throw err;
+  client_ttv.say(target, "Queue Cleared!");
+  knex.raw('truncate table queue')
+  .then()
       console.log("Queue Cleared");
-      
-    });
+    } ;
+
+    
   
 
-} )}
-;
+};;
 
 
 function fuck(){
 	console.log('you fucked up bitch')
+};
+
+function penis(){
+  console.log('poggers code erected like a penis!')
 };
 
 
@@ -213,7 +278,7 @@ if (commandName === '!song') {
 spotifyApi.getMyCurrentPlayingTrack()
   .then(function(data) {
     console.log('Now playing: ' + data.body.item.name);
-	client.say(target, 'Now playing: ' + data.body.item.name);
+	client_ttv.say(target, 'Now playing: ' + data.body.item.name);
   }, function(err) {
     console.log('Something went wrong!', err);
   });
