@@ -13,6 +13,32 @@ client.once('ready', () => {
 
 // Login to Discord with your client's token
 client.login(token);*/
+//Start of code or something
+var cooldowns = {}
+var minute = 60000;
+var hour = minute * 60;
+async function sleep(ms) {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
+//Set cooldown
+ //Set a 24 hour cooldown
+ 
+
+ function resolveAfter2Seconds() {
+  return new Promise(resolve => {
+    setTimeout(() => {
+      resolve('resolved');
+    }, 60000);
+  });
+}
+
+async function asyncCall() {
+  console.log('calling');
+  const result = await resolveAfter2Seconds();
+  console.log(result);
+  // expected output: "resolved"
+}
+
 
 
 const fs =require('fs')
@@ -20,6 +46,7 @@ const tmi = require('tmi.js');
 import { CHANNEL_NAME, OAUTH_TOKEN, BOT_USERNAME } from './constants';
 import { rolldie} from './variables';
 import fetch  from "node-fetch";
+import { waitForDebugger } from 'inspector';
 var MySql = require('sync-mysql');
 
 var connection = new MySql({
@@ -96,8 +123,6 @@ function onMessageHandler (target, channel, message, self,) { //added userstate 
 	  const num = rolldie();
 	  client_ttv.say(target, `@${channel.username} rolled a ${num}`);
 	  console.log(`* Executed ${commandName} command`);
-	} else {
-	  console.log(`* Unknown command ${commandName}`);
 	};
 
 var twtchname = (channel.username)
@@ -107,7 +132,7 @@ if (commandName === '!test'){
     }
 
   if (commandName === '!joinq') {
-    knex('queue')
+  setTimeout(() =>  knex('queue')
   .insert({
     username: (channel.username),
   })
@@ -115,7 +140,7 @@ if (commandName === '!test'){
   .ignore()
   .catch(function(error) {
     console.log(error)
-  });
+  }), 2000); 
   knex.select('fuck')
   .from('queue')
   .where({ username: (twtchname) })
@@ -123,10 +148,18 @@ if (commandName === '!test'){
     const fck =  JSON.stringify(rows);
     const fcks = JSON.parse(fck);
     console.log(fck[9]);
-    client_ttv.say(target, '@'+(twtchname)+ ' in queue at position '+(fck[9]))
+    console.log(rows);
+    console.log(fck);
+    //client_ttv.say(target, '@'+(twtchname)+ ' in queue at position '+(rows));
+    setTimeout(() => {client_ttv.say(target, '@'+(twtchname)+ ' in queue at position '+(rows));}, 2000);
+    //client_ttv.say(target, '@'+(twtchname)+ ' in queue at position '+(fcks[9]));
+    setTimeout(() => {client_ttv.say (target, '@'+(twtchname)+ ' in queue at position '+(fcks[9]));}, 4000);
+    //client_ttv.say(target, '@'+(twtchname)+ ' in queue at position '+(fck[9]));
+    setTimeout(() => {client_ttv.say (target, '@'+(twtchname)+ ' in queue at position '+(fck[9]));}, 6000);
   })
      // client_ttv.say(target, `@${channel.username} addedto queue your position in queue is ` (fck)[9] );
-       console.log("1 record inserted") 
+       console.log("End of code line")
+      
       };
 //Doesnt add username only adds +channel.username+ too DB
 
@@ -134,7 +167,7 @@ if (commandName === '!test'){
 		var ranks;
 var id;
 
-const api_key = 'RGAPI-0889f6b1-bf25-4b9c-b6e9-1abf93e63bd3';
+const api_key = 'RGAPI-1a01e009-2cb2-4847-afeb-19bb95954a92';
 let names = ['ChefAJ', 'Chef Arsehole J', 'ChefAjA', 'TheChefAj', 'UwuSenpaiSpankMe', 'AjxBlood', 'ExpansionRectum', 'AjxFear']
 for (const name of names){
     var get_id = fetch('https://na1.api.riotgames.com/lol/summoner/v4/summoners/by-name/' + name + '?api_key=' + api_key).then(data =>{return data.json()}).then(data => id = data).then(() => {
@@ -168,7 +201,8 @@ if(isModUp) {
 
 
 if (commandName === '!resettest'){
-  knex.schema.raw('ALTER TABLE `queue` AUTO_INCREMENT = 1')
+  //knex.schema.raw('ALTER TABLE `queue` AUTO_INCREMENT = 1')
+  knex.raw('ALTER TABLE queue AUTO_INCREMENT = 1')
   .then()
 
 };
